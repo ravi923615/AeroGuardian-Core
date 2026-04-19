@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aeroguardian-core"
+version = "0.1.0"
+description = "OpenSky live state-vector monitor with spoof-detection heuristics."
+readme = "README.md"
+requires-python = ">=3.9"
+
+[project.scripts]
+aeroguardian-monitor = "aeroguardian.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
