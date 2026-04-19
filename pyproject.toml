@@ -8,10 +8,21 @@ version = "0.1.0"
 description = "OpenSky live state-vector monitor with spoof-detection heuristics."
 readme = "README.md"
 requires-python = ">=3.9"
+keywords = ["aviation", "opensky", "ads-b", "flight-tracking", "osint", "spoof-detection"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Security",
+]
 
 [project.scripts]
 aeroguardian-monitor = "aeroguardian.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/ravi923615/AeroGuardian-Core"
+Repository = "https://github.com/ravi923615/AeroGuardian-Core"
+Issues = "https://github.com/ravi923615/AeroGuardian-Core/issues"
+
 [tool.setuptools.packages.find]
 where = ["src"]
-
