@@ -1,0 +1,3 @@
+[console_scripts]
+aeroguardian-latency-monitor = aeroguardian.latency_cli:main
+aeroguardian-monitor = aeroguardian.cli:main

@@ -1,30 +1,35 @@
+Metadata-Version: 2.4
+Name: aeroguardian-core
+Version: 0.1.0
+Summary: OpenSky live state-vector monitor with spoof-detection heuristics.
+Project-URL: Homepage, https://github.com/ravi923615/AeroGuardian-Core
+Project-URL: Repository, https://github.com/ravi923615/AeroGuardian-Core
+Project-URL: Issues, https://github.com/ravi923615/AeroGuardian-Core/issues
+Keywords: aviation,opensky,ads-b,flight-tracking,osint,spoof-detection
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Security
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: pyopensky>=2.16
+
 # AeroGuardian-Core
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-0b7285)](https://www.python.org/downloads/)
 [![GitHub stars](https://img.shields.io/github/stars/ravi923615/AeroGuardian-Core?style=social)](https://github.com/ravi923615/AeroGuardian-Core/stargazers)
 
-AeroGuardian-Core is an open-source framework designed to enhance the resilience of the National Airspace System by detecting kinematic and temporal anomalies in automated flight management networks.
+Live OpenSky Network state-vector monitoring for identifying suspicious aircraft performance anomalies in commercial traffic.
 
-The project combines live OpenSky state-vector screening, timing-integrity validation, and flight-plan import hardening so researchers and security engineers can evaluate how spoofing, replay, delay injection, and unsafe file ingestion could affect aviation automation workflows.
-
-Security disclosures are handled through [SECURITY.md](SECURITY.md). Downstream research and reuse are permitted under the [MIT License](LICENSE).
+AeroGuardian-Core polls real-time aircraft state vectors, maintains short-lived per-aircraft history, and emits `SPOOF_DETECTION` events when an aircraft appears to violate a maximum-performance sanity filter. The project is framed around enhancing the resilience of the National Airspace System through data-driven anomaly screening and timing-integrity validation.
 
 ## Mission Focus
 
 - Uses live OpenSky state vectors instead of static samples.
-- Maps each defensive control to a concrete aviation-cybersecurity attack surface.
-- Keeps the logic compact enough to audit while leaving room for deeper ADS-B, FMS, and navigation-integrity analytics.
+- Focuses on aviation cybersecurity and surveillance-integrity use cases relevant to resilient airspace operations.
+- Keeps the logic compact enough to audit while leaving room for more advanced ADS-B and navigation-integrity analytics.
 
-## Security Architecture
-
-| Module | Control objective | Attack vector mitigated |
-| --- | --- | --- |
-| [`src/aeroguardian/detector.py`](src/aeroguardian/detector.py) | Flags impossible commercial-aircraft kinematics from live state vectors. | Spoofed or corrupted surveillance data that produces implausible performance excursions. |
-| [`src/aeroguardian/latency_monitor.py`](src/aeroguardian/latency_monitor.py) | Compares sensor and server arrival timing, sustained jitter, and out-of-order samples. | Man-in-the-Middle delay injection, buffering, and timing manipulation. |
-| [`src/aeroguardian/temporal_validator.py`](src/aeroguardian/temporal_validator.py) | Validates clock-delta stability and sawtooth replay patterns in historical timing data. | Replay attacks and delayed traffic reinjection. |
-| [`src/aeroguardian/import_sanitizer.py`](src/aeroguardian/import_sanitizer.py) | Audits imported flight-plan paths and simulates sandboxed writes restricted to `/flight_plans/`. | Path traversal and unauthorized file overwrite attempts during flight-plan ingestion. |
-
-## Kinematic Detection Logic
+## Detection logic
 
 The current maximum-performance filter flags a commercial aircraft when either of these conditions is met:
 
@@ -72,12 +77,13 @@ flowchart LR
     E --> F["SPOOF_DETECTION JSON events"]
 ```
 
-Runtime plumbing:
+Core code paths:
 
 - [`src/aeroguardian/opensky_client.py`](src/aeroguardian/opensky_client.py) handles OpenSky authentication and polling.
-- [`src/aeroguardian/cli.py`](src/aeroguardian/cli.py) runs the polling loop and prints JSON output.
+- [`src/aeroguardian/detector.py`](src/aeroguardian/detector.py) applies the maximum-performance anomaly rules.
+- [`src/aeroguardian/latency_monitor.py`](src/aeroguardian/latency_monitor.py) validates timing jitter between sensor and server timestamps.
 - [`src/aeroguardian/latency_cli.py`](src/aeroguardian/latency_cli.py) provides a command-line interface for historical timing analysis.
-- [`scripts/import_sanitizer.py`](scripts/import_sanitizer.py) runs the file-integrity audit and sandbox simulator from the shell.
+- [`src/aeroguardian/cli.py`](src/aeroguardian/cli.py) runs the polling loop and prints JSON output.
 
 ## Important OpenSky constraints
 
@@ -148,26 +154,6 @@ aeroguardian-latency-monitor \
 
 The CLI emits a JSON summary first, followed by one JSON line per alert.
 
-## Temporal Validator Usage
-
-```bash
-PYTHONPATH=src python3 scripts/temporal_validator.py \
-  --start "2025-01-01T00:00:00Z" \
-  --stop "2025-01-01T00:15:00Z"
-```
-
-The temporal validator detects unstable `delta_t` drift and sawtooth timing resets that are consistent with replay-style traffic injection windows.
-
-## Flight Plan Import Hardening
-
-```bash
-PYTHONPATH=src python3 scripts/import_sanitizer.py "%2e%2e%2fetc/passwd" \
-  --simulate-write \
-  --sandbox-root /tmp/aeroguardian-demo
-```
-
-The sanitizer repeatedly decodes imported file paths, blocks parent-directory and absolute-path escapes, and appends a JSON audit event whenever a simulated importer attempts to write outside the `/flight_plans/` sandbox.
-
 ## Local verification
 
 ```bash
@@ -187,8 +173,6 @@ PYTHONPYCACHEPREFIX=/tmp/aeroguardian-pyc python3 -m compileall src tests script
 
 Ideas, issues, and improvements are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) if you want to extend the detector, improve the analytical workflow, or strengthen the project's contribution to aviation-system resilience.
 
-If you identify a security issue, follow [SECURITY.md](SECURITY.md) instead of opening a public issue.
-
 Good first areas:
 
 - More realistic commercial-aircraft classification.
@@ -205,7 +189,3 @@ This repository may be useful if you are looking for: `OpenSky`, `ADS-B`, `aviat
 - [OpenSky API landing page](https://opensky-network.org/data/api)
 - [OpenSky REST API docs](https://openskynetwork.github.io/opensky-api/rest.html)
 - [OpenSky FAQ authentication guidance](https://opensky-network.org/about/faq)
-
-## License
-
-This repository is released under the [MIT License](LICENSE).
