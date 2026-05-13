@@ -23,6 +23,7 @@ Security disclosures are handled through [SECURITY.md](SECURITY.md). Downstream 
 | [`src/aeroguardian/latency_monitor.py`](src/aeroguardian/latency_monitor.py) | Compares sensor and server arrival timing, sustained jitter, and out-of-order samples. | Man-in-the-Middle delay injection, buffering, and timing manipulation. |
 | [`src/aeroguardian/temporal_validator.py`](src/aeroguardian/temporal_validator.py) | Validates clock-delta stability and sawtooth replay patterns in historical timing data. | Replay attacks and delayed traffic reinjection. |
 | [`src/aeroguardian/import_sanitizer.py`](src/aeroguardian/import_sanitizer.py) | Audits imported flight-plan paths and simulates sandboxed writes restricted to `/flight_plans/`. | Path traversal and unauthorized file overwrite attempts during flight-plan ingestion. |
+| [`src/aeroguardian/buffer_validator.py`](src/aeroguardian/buffer_validator.py) | Enforces ARINC 424 fixed-column (132-char) and ARINC 429 32-bit word-width limits during navigation record parsing. | Buffer overflow attacks against RTOS-hosted FMS parsers during data ingestion. |
 
 ## Kinematic Detection Logic
 
@@ -167,6 +168,16 @@ PYTHONPATH=src python3 scripts/import_sanitizer.py "%2e%2e%2fetc/passwd" \
 ```
 
 The sanitizer repeatedly decodes imported file paths, blocks parent-directory and absolute-path escapes, and appends a JSON audit event whenever a simulated importer attempts to write outside the `/flight_plans/` sandbox.
+
+## RTOS Memory Sandbox — Buffer Integrity
+
+```bash
+PYTHONPATH=src python3 scripts/buffer_integrity_test.py
+PYTHONPATH=src python3 scripts/buffer_integrity_test.py --verbose
+PYTHONPATH=src python3 scripts/buffer_integrity_test.py --record "YOUR_RAW_ARINC_424_RECORD"
+```
+
+The buffer-integrity test feeds ARINC 424 navigation records into a fixed-width buffer parser that enforces the 132-character record limit and the ARINC 429 32-bit (4-byte) word boundary. Records that exceed these limits produce a structured `SecurityException` rather than crashing — simulating the memory-safety discipline required in RTOS-hosted FMS software.
 
 ## Local verification
 

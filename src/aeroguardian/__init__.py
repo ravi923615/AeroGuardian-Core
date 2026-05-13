@@ -6,8 +6,10 @@ from typing import Any, Dict, Tuple
 
 _EXPORTS: Dict[str, Tuple[str, str]] = {
     "AircraftState": (".models", "AircraftState"),
+    "Arinc424RecordParser": (".buffer_validator", "Arinc424RecordParser"),
     "DetectionEvent": (".models", "DetectionEvent"),
     "FilterConfig": (".detector", "FilterConfig"),
+    "FixedWidthBuffer": (".buffer_validator", "FixedWidthBuffer"),
     "ImportAuditResult": (".import_sanitizer", "ImportAuditResult"),
     "LatencyAlert": (".latency_monitor", "LatencyAlert"),
     "LatencyMonitor": (".latency_monitor", "LatencyMonitor"),
@@ -17,6 +19,7 @@ _EXPORTS: Dict[str, Tuple[str, str]] = {
     "OpenSkyClient": (".opensky_client", "OpenSkyClient"),
     "SandboxEvent": (".import_sanitizer", "SandboxEvent"),
     "SandboxSimulator": (".import_sanitizer", "SandboxSimulator"),
+    "SecurityException": (".buffer_validator", "SecurityException"),
     "Snapshot": (".models", "Snapshot"),
     "TemporalAlert": (".temporal_validator", "TemporalAlert"),
     "TemporalSample": (".temporal_validator", "TemporalSample"),
